@@ -23,7 +23,7 @@ blocksize/ops' time(ms)|	naive scan(ms)|	efficient scan(ms)
 
 - *Compare all of these GPU Scan implementations (Naive, Work-Efficient, and Thrust) to the serial CPU version of Scan. Plot a graph of the comparison (with array size on the independent axis).*
 
-Array Size(2^(n))/ops' time(ms)|	Naïve |	Work Efficient(optimized)|	Work Efficient(not optimized) |	Thrust
+Array Size(2^(n))/ops' time(ms)|	Naïve |	Work Efficient(not optimized)|	Work Efficient(optimized) |	Thrust
 ----|----|----|----|----
 3	| 0.032 |	0.029 |	0.093 |	0.085
 6	| 0.049	| 0.046	|0.058|	0.065
