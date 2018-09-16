@@ -35,7 +35,7 @@ Array Size(2^(n))/ops' time(ms)|	Naïve |	Work Efficient(optimized)|	Work Effici
 24	| 35.408	| 19.495	|7.925|	0.932
 27	| 317.784	| 141.549	|61.03|	5.704
 
-- the corresponding graph are:
+- the corresponding graph is:
 
 ![](https://github.com/LanLou123/Project2-Stream-Compaction/raw/master/arraysize.JPG)
 
