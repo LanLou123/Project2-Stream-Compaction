@@ -6,6 +6,38 @@ CUDA Stream Compaction
 * Lan Lou
 * Tested on:  Windows 10, i7-6700HQ @ 2.6GHz 16GB, GTX 1070 8GB (Personal Laptop)
 
+## Project Features:
+
+- CPU scan: This is the most basic way of doing a prefix sum(looping & adding in cpu).
+- Naive scan : what differentiate naive from simple cpu is that this approach happens on gpu, and also we change into using the follwing algorithm shown in the pseudo code:
+```for d = 1 to log2n
+  for all k in parallel
+    if (k >= 2d-1)
+      x[k] = x[k – 2d-1] + x[k];
+```
+which ensure that parallel can be applied.
+
+- Efficient GPU scan : by changing the original naive algorithm into two steps:upsweep and downsweep, we can shorten the amount of operations times it took significantly, the following two shows the pseudo code of up and down sweep:
+
+#### upsweep:
+```
+for d = 0 to log2n - 1
+  for all k = 0 to n – 1 by 2d+1 in parallel
+    x[k + 2d+1 – 1] += x[k + 2d – 1];
+```
+
+#### downsweep:
+```
+x[n - 1] = 0
+for d = log2n – 1 to 0
+  for all k = 0 to n – 1 by 2d+1 in parallel
+    t = x[k + 2d – 1];              
+    x[k + 2d – 1] = x[k + 2d+1 – 1];  
+    x[k + 2d+1 – 1] += t;       
+```    
+- Efficient scan(optimized)(Extra points) : when finished the former efficient, I discovered that it wasn't even faster than cpu methods, so I went for the optimized version as extra points: the reason for this to happen is that we haven't made full use of all threads in a upsweep or downsweep kernal, since it has braching in it, we will always have some "non-functional" threads,therefore, I decided that instead of judging inside the kernal about if the current loop's thread is a multiple of ```2^(d+1)```, we bring this outside into the scan functions, in it ,we will first  caculate the block num for each loop to be ```blocknum = (adjustlen/interval + blocksize ) / blocksize;``` by dividing the array total length with ```interval = 2^(d-1)```, and also, inside the kernal, we will mutiply the index of threads with ```2^(d-1)``` to make sure it's a multiple of it, as for the others , they will stay the same.
+
+- compact for cpu & efficient: this part algorithm is simmilar for both, as first step, you turn the array into a buffer only containing 1 and 0 through judging if it's 0 or not, then, you do scanning using corresponding method each, after that, we will treat the caculated buffer as outter layer indices to fill into the output buffer, and only taking into acount the inner indices that is having value 1 according to the boolean buffer.
 
 ## Questions:
 - *Roughly optimize the block sizes of each of your implementations for minimal run time on your GPU.*
@@ -38,6 +70,12 @@ Array Size(2^(n))/ops' time(ms)|	Naïve |	Work Efficient(not optimized)|	Work Ef
 - the corresponding graph is:
 
 ![](https://github.com/LanLou123/Project2-Stream-Compaction/raw/master/arraysize.JPG)
+
+- frome the graph we can tell the efficiency of those GPU method arraged in order are: thrust>efficient(optimized)>efficient(not optimized)>naive.
+
+- *Write a brief explanation of the phenomena you see here.*
+
+some performence issues encountered by efficient gpu as i mentioned before is because of invalid use of thread which lead to a lot of wasting, as for the others, one thing that I noticed is that the program will crash when I set the array size to be 2^30,since it's same for all methods, I guess it's the memory IO that's causing this bottleneck.
 
 
 ## Results
